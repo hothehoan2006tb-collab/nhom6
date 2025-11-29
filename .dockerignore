@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Env
+.env
+.env.*
+
+# Virtual env
+venv/
+.venv/
+
+# OS file
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Streamlit logs
+.streamlit/
