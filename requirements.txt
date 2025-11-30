@@ -1,6 +1,13 @@
 streamlit
+pandas
+requests
 plotly
 reportlab
 python-pptx
-openai
+fastapi
+uvicorn[standard]
+python-dotenv
 google-generativeai
+markdown
+watchdog
+python-docx
