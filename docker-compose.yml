@@ -1,11 +1,32 @@
-version: "3.9"
-
 services:
-  app:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: population_dashboard
+    env_file: be/.env
+    environment:
+      - PYTHONPATH=/app
+    working_dir: /app
+    command: uvicorn be.api:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: be/.env
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - STREAMLIT_SERVER_RUN_ON_SAVE=true
+      - PYTHONPATH=/app
+    working_dir: /app
+    command: streamlit run fe/main.py --server.port 8501 --server.address 0.0.0.0
     ports:
       - "8501:8501"
-    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - ./:/app
