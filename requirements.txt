@@ -11,3 +11,6 @@ google-generativeai
 markdown
 watchdog
 python-docx
+scipy
+scikit-learn
+groq

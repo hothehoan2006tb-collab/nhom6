@@ -1,39 +1,129 @@
-# HƯỚNG DẪN DUANSINHDE (Docker Compose)
+# HƯỚNG DẪN CHẠY CODE - PHÂN TÍCH DÂN SỐ
 
-## 1) Tổng quan luồng chạy
-Bạn có 2 service:
+## YÊU CẦU HỆ THỐNG
 
-### A) Backend (FastAPI) – `api.py`
-- `GET /worldbank/countries`: lấy danh sách quốc gia từ World Bank
-- `GET /worldbank/series/{country_id}?start_year&end_year`: lấy chuỗi dữ liệu birth/death/pop
-- `POST /ai/analyze`: nhận `summary_text` và gọi Gemini (qua `gpt_utils.py`) trả về `markdown`
+- **Python**: 3.8 trở lên
+- **Pip**: Phiên bản mới nhất
+- **API Keys**: Groq API key
 
-Gemini API key lấy từ `.env`:
-- `GEMINI_API_KEY`
-- `GEMINI_MODEL` (mặc định gemini-2.5-flash)
+---
 
-### B) Frontend (Streamlit) – `main.py`
-- Gọi backend để:
-  - load countries
-  - fetch series theo country_id + year range
-  - khi bấm “Phân tích bằng Gemini” thì POST summary_text lên `/ai/analyze`
-- Render markdown bằng thư viện `markdown` (file `md_utils.py`) nên hạn chế lỗi markdown bị “dính code block”.
+## BƯỚC 1: CÀI ĐẶT
 
-## 2) Các file chính
-- `main.py`: UI Streamlit
-- `api.py`: API FastAPI
-- `data_utils.py`: WorldBank fetch & normalize dataframe
-- `gpt_utils.py`: Gemini service (đọc env, call model)
-- `md_utils.py`: normalize + render markdown -> HTML box scroll
-- `exporters.py`: xuất PDF/PPTX
-- `docker-compose.yml`: chạy 2 service FE/BE
-- `Dockerfile`: image chung cho cả FE/BE
+### 1.1. Mở Terminal tại thư mục project
 
-## 3) Chạy bằng Docker Compose
-### Bước 1: tạo .env
-- Copy `.env.example` thành `.env`
-- Dán `GEMINI_API_KEY` thật
+```powershell
+cd d:\laptrinhkhoahoc\nhom6
+```
 
-### Bước 2: build + run
-```bash
-docker compose up --build
+### 1.2. Cài đặt dependencies
+
+```powershell
+pip install -r requirements.txt
+```
+
+---
+
+## BƯỚC 2: CẤU HÌNH API KEY
+
+### 2.1. Mở file `.env`
+
+```powershell
+notepad be\.env
+```
+
+### 2.2. Cấu hình
+
+```env
+OPEN_MODEL=2
+GROQ_API_KEY=gsk_your_key_here
+BACKEND_URL=http://localhost:8001
+```
+
+**Lấy key:** https://console.groq.com/keys
+
+---
+
+## BƯỚC 3: CHẠY BACKEND
+
+### Terminal 1:
+
+```powershell
+cd d:\laptrinhkhoahoc\nhom6
+python -m uvicorn be.api:app --reload --port 8001
+```
+
+**Thành công khi thấy:**
+```
+INFO: Uvicorn running on http://127.0.0.1:8001
+```
+
+**Kiểm tra:** http://localhost:8001/health
+
+---
+
+## BƯỚC 4: CHẠY FRONTEND
+
+### Terminal 2 (MỞ MỚI):
+
+```powershell
+cd d:\laptrinhkhoahoc\nhom6
+python -m streamlit run fe/main.py
+```
+
+**Browser tự động mở:** http://localhost:8501
+
+---
+
+## BƯỚC 5: SỬ DỤNG
+
+```
+1. Chọn quốc gia → Chọn năm
+2. Click "Tải dữ liệu"
+3. Click "Xử lý thống kê"
+4. Click "Phân tích bằng AI"
+5. Xem validation score
+6. Nếu < 95: Click "Regenerate"
+7. Export file
+```
+
+---
+
+## XỬ LÝ LỖI
+
+### Lỗi: "GROQ_API_KEY not set"
+→ Check file `be\.env`, restart backend
+
+### Lỗi: Port đã dùng
+```powershell
+netstat -ano | findstr :8001
+taskkill /F /PID [PID]
+```
+
+### Lỗi: Connection refused
+→ Đảm bảo backend (Terminal 1) đang chạy
+
+---
+
+## DỪNG HỆ THỐNG
+
+- Terminal 1 & 2: Nhấn `Ctrl + C`
+
+---
+
+## TÓM TẮT LỆNH
+
+```powershell
+# Setup (1 lần)
+pip install -r requirements.txt
+notepad be\.env
+
+# Chạy hàng ngày
+# Terminal 1:
+python -m uvicorn be.api:app --reload --port 8001
+
+# Terminal 2:
+python -m streamlit run fe/main.py
+```
+
+**Truy cập:** http://localhost:8501 🚀
